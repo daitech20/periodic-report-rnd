@@ -28,7 +28,7 @@ class Personnel(models.Model):
     personnel_out = models.IntegerField(default=0, verbose_name="Số nhân sự out")
     resignation_rate = models.IntegerField(default=0, verbose_name="Tỉ lệ nghỉ việc <20% (2NS/1NĂM)")
     wfo_wfh = models.CharField(max_length=10, verbose_name="WFO-WFH")
-    health_status = models.CharField(max_length=100, default="Bình thường", verbose_name="Tình hình sức khỏe")
+    health_status = models.CharField(max_length=100, default="Bình thường", verbose_name="Tình hình sức khỏe", null=True)
 
     class Meta:
         verbose_name_plural = "Nhân sự"
@@ -42,8 +42,8 @@ class Bug(models.Model):
     id_bug = models.CharField(max_length=10)
     modified = models.DateField(default=timezone.now)
     created_at = models.DateField(default=timezone.now)
-    timeline = models.DateField(default=timezone.now, null=True)
-    note = models.CharField(max_length=50, null=True)
+    timeline = models.DateField(default=timezone.now)
+    note = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Số bugs"
@@ -54,10 +54,10 @@ class ProjectReport(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_reports", verbose_name="Dự án")
     overview = models.TextField(verbose_name="Over view")
     feature = models.TextField(verbose_name="Tính năng")
-    bugs = models.TextField(verbose_name="Bugs")
+    bugs = models.TextField(verbose_name="Bugs", null=True, blank=True)
     plan = models.TextField(verbose_name="Kế hoạch tuần sau")
-    emerging_issues = models.TextField(verbose_name="Issue - Phát sinh")
-    pending_issues = models.TextField(verbose_name="Tồn đọng")
+    emerging_issues = models.TextField(verbose_name="Issue - Phát sinh", default="Không", null=True)
+    pending_issues = models.TextField(verbose_name="Tồn đọng", default="Không", null=True)
 
     class Meta:
         unique_together = ('time', 'project', )
@@ -65,7 +65,7 @@ class ProjectReport(models.Model):
 
 
 class Nsns(models.Model):
-    time = models.ForeignKey(TimeLine, on_delete=models.CASCADE, verbose_name="NSNS")
+    time = models.ForeignKey(TimeLine, on_delete=models.CASCADE, verbose_name="Thời gian")
     personnel = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name="Nhân sự")
     nsns = models.IntegerField(default=0)
     norm = models.IntegerField(default=0, verbose_name="% norm tuần")
@@ -80,10 +80,15 @@ class KpiOkr(models.Model):
     docs = models.TextField(verbose_name="Hoàn thành docs về tính năng - API (Flow, data schema, swimlane logic) trên mỗi task được nhận")
     update_taiga = models.TextField(verbose_name="Hoàn thành update đủ thông tin task trên taiga ")
     bug_total = models.TextField(verbose_name="Có tổng số bug/sprint <= 5")
-    reprimand = models.TextField(verbose_name="Đảm bảo số lần CBQL nhắc nhở, khiển trách về công việc, thái độ trách nhiệm của bản thân < 2 lần")
-    seminar = models.TextField(verbose_name="Nghiên cứu và trình bày seminar công nghệ")
-    certificate = models.TextField(verbose_name="Thi chứng chỉ quốc tế")
-    stack_training = models.TextField(verbose_name="Đào tạo stack")
+    reprimand = models.TextField(
+        verbose_name="Đảm bảo số lần CBQL nhắc nhở, khiển trách về công việc, thái độ trách nhiệm của bản thân < 2 lần",
+        default="Đạt",
+        null=True,
+        blank=True
+    )
+    seminar = models.TextField(verbose_name="Nghiên cứu và trình bày seminar công nghệ", default="Không", null=True, blank=True)
+    certificate = models.TextField(verbose_name="Thi chứng chỉ quốc tế", default="Không", null=True, blank=True)
+    stack_training = models.TextField(verbose_name="Đào tạo stack", default="Không", null=True, blank=True)
     
     class Meta:
         verbose_name_plural = "KPI & OKR"
@@ -91,11 +96,11 @@ class KpiOkr(models.Model):
 
 class EmergingIssues(models.Model):
     time = models.OneToOneField(TimeLine, on_delete=models.CASCADE, verbose_name="Thời gian")
-    team_meeting = models.TextField(verbose_name="Họp team")
-    review_new_personnel = models.TextField(verbose_name="Đánh giá nhân sự mới")
-    employee_turnover = models.TextField(verbose_name="Biến động nhân sự")
-    hand_over_traning = models.TextField(verbose_name="Traning bàn giao") 
-    movement = models.TextField(verbose_name="Phong trào")
+    team_meeting = models.TextField(verbose_name="Họp team", default="Không", null=True)
+    review_new_personnel = models.TextField(verbose_name="Đánh giá nhân sự mới", default="Không", null=True)
+    employee_turnover = models.TextField(verbose_name="Biến động nhân sự", default="Không", null=True)
+    hand_over_traning = models.TextField(verbose_name="Traning bàn giao", default="Không", null=True) 
+    movement = models.TextField(verbose_name="Phong trào", default="Không", null=True)
 
     class Meta:
         verbose_name_plural = "Vấn đề phát sinh"
@@ -104,7 +109,7 @@ class EmergingIssues(models.Model):
 class TimeOff(models.Model):
     time = models.ForeignKey(TimeLine, on_delete=models.CASCADE, verbose_name="Thời gian")
     personnel = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name="Nhân sự")
-    timeoff_total = models.FloatField(default=0, verbose_name="số ngày phép đã nghỉ")
+    timeoff_total = models.FloatField(default=0, verbose_name="số ngày phép đã nghỉ", editable=False)
     timeoff_of_week = models.FloatField(default=0, verbose_name="số ngày nghỉ trong tuần")
     reason = models.CharField(max_length=50, verbose_name="lý do")
 

@@ -63,6 +63,7 @@ class NsnsList(generics.ListAPIView):
     permission_classes = ()
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['time__time', 'time__title', 'personnel__username']
+    filterset_fields = ['personnel__username',]
 
 
 class KpiOkrList(generics.ListAPIView):
